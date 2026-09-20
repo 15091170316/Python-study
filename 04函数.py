@@ -107,6 +107,29 @@
 #         return n * jc(n - 1)    # 递归调用自身，直到n等于1
 # print(jc(10))   # 计算10的阶乘
 
+# ---------- 类型注解 ---------
+# -- 类型注解是Python中的一种语法特性，用于明确标识变量、函数参数和返回值的数据类型，增强代码的可读性和可维护性。
+# -- 类型注解只是提供类型提示，并不会影响代码的运行，也不会进行类型检查，Python仍然是动态类型语言。
+# -- 类型注解的语法为：变量名: 类型 = 值
+# num: int = 10   # 变量num的类型为int
+# no: None = None   # 变量no的类型为None
+# name: str = "Alice"   # 变量name的类型为str
+# arr1: list = [1, 2, 3]   # 变量arr1的类型为list
+# arr2: list[int] = [1, 2, 3]   # 变量arr2的类型为list，且列表中的元素类型为int
+# arr3: list[str | int] = ["Alice", 1, "Bob", 2]   # 变量arr3的类型为list，且列表中的元素类型为str或int
+# ids: set[str] = {"id1", "id2", "id3"}   # 变量ids的类型为set，且集合中的元素类型为str
+# options: dict[str, int] = {"add": 1, "sub": 2}   # 变量options的类型为dict，且字典中的键类型为str，值类型为int
+# goods: tuple[str, int, float] = ("apple", 10, 5.5)   # 变量goods的类型为tuple，且元组中的元素类型为str、int和float
+# anything: Any = "Hello"   # 变量anything的类型为Any，表示可以是任意类型
 
-
+# ---------- 函数的类型注解 ---------
+# -- 函数的类型注解用于标识函数参数和返回值的数据类型，增强代码的可读性和可维护性。
+# -- 函数的类型注解语法为：def 函数名(参数名: 类型, ...) -> 返回值类型:
+# 语法案例：
+# def add(x: int, y: int) -> int:
+#     return x + y
+# def calc_data(data: list[int]) -> tuple[int, float]:    # 注意：函数有多个返回值时，返回值类型为元组，元组中每个元素的类型用逗号隔开
+#     total = sum(data)
+#     avg = total / len(data)
+#     return total, avg
 
