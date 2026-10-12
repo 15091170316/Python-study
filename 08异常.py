@@ -34,15 +34,15 @@
 # -- raise 语句的基本语法：raise [异常类型]([异常信息])
 # -- 异常类型是可选的，如果不指定异常类型，则表示抛出默认的异常类型。
 # -- 异常信息是可选的，如果不指定异常信息，则表示使用默认的异常信息。
-try:
-    num1 = int(input("请输入一个整数："))
-    num2 = int(input("请输入另一个整数："))
-    if num2 == 0:
-        raise ZeroDivisionError("除数不能为0")
-    result = num1 / num2
-    print("结果：", result)
-except ValueError:
-    print("输入的不是整数")
-except ZeroDivisionError as e:
-    print("发生了除数为0的异常：", e)
+# try:
+#     num1 = int(input("请输入一个整数："))
+#     num2 = int(input("请输入另一个整数："))
+#     if num2 == 0:
+#         raise ZeroDivisionError("除数不能为0")
+#     result = num1 / num2
+#     print("结果：", result)
+# except ValueError:
+#     print("输入的不是整数")
+# except ZeroDivisionError as e:
+#     print("发生了除数为0的异常：", e)
 
