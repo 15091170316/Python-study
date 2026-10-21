@@ -1,6 +1,8 @@
 import streamlit as st
 from openai import OpenAI
 import os
+import datetime
+import json
 
 api_key = os.environ.get("DEEPSEEK_API_KEY")
 system_content = """
@@ -25,6 +27,8 @@ if "chat_name" not in st.session_state:
     st.session_state.chat_name = "小团团"
 if "chat_personality" not in st.session_state:
     st.session_state.chat_personality = "活泼可爱的台湾姑娘"
+if "current_session" not in st.session_state:
+    st.session_state.current_session = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # for backward compatibility, you can still use `https://api.deepseek.com/v1` as `base_url`.
 client = OpenAI(
@@ -40,16 +44,71 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# 新建会话
+def createNewSession():
+    # 保存会话
+    saveSession()
+    if len(st.session_state.messages) > 0:
+        # 创建新的会话
+        st.session_state.current_session = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        st.session_state.messages = []
+        # 保存新的会话
+        saveSession()
+
+# 加载会话列表
+def loadSessions():
+    sessions = []
+    if os.path.exists("./11AI应用_实战_AI智能伴侣/sessions"):
+        for file_name in os.listdir("./11AI应用_实战_AI智能伴侣/sessions"):
+            if file_name.endswith(".json"):
+                with open(f"./11AI应用_实战_AI智能伴侣/sessions/{file_name}", "r", encoding="utf-8") as f:
+                    sessions.append(json.load(f))
+    return sessions
+
+# 加载会话数据
+def loadSessionData(session):
+    st.session_state.current_session = session["current_session"]
+    st.session_state.chat_name = session["chat_name"]
+    st.session_state.chat_personality = session["chat_personality"]
+    st.session_state.messages = session["messages"]
+
+# 删除历史会话
+def deleteSession(sessionName):
+    if os.path.exists(f"./11AI应用_实战_AI智能伴侣/sessions/{sessionName}.json"):
+        os.remove(f"./11AI应用_实战_AI智能伴侣/sessions/{sessionName}.json")
+
 # 设置页面标题和描述
 st.logo("🧸", size="large")
 st.title("AI智能伴侣")
 st.write("欢迎使用AI智能伴侣，这是一个可以与您进行自然语言交流的AI助手。")
 
+# 保存会话
+def saveSession():
+    if st.session_state.current_session:
+        session_data = {
+            "current_session": st.session_state.current_session,
+            "chat_name": st.session_state.chat_name,
+            "chat_personality": st.session_state.chat_personality,
+            "messages": st.session_state.messages,
+        }
+        if not os.path.exists("./11AI应用_实战_AI智能伴侣/sessions"):
+            os.mkdir("./11AI应用_实战_AI智能伴侣/sessions")
+        with open(f"./11AI应用_实战_AI智能伴侣/sessions/{st.session_state.current_session}.json", "w", encoding="utf-8") as f:
+            json.dump(session_data, f, ensure_ascii=False, indent=4)
+
 # 设置侧边栏
 with st.sidebar:
     st.subheader("AI控制面板")
-    st.button("新建会话")
-    st.write("历史会话")
+    st.button("新建会话", icon="🖌️", width="stretch", on_click=createNewSession)
+    st.text("历史会话")
+    sessions = loadSessions()
+    for session in sessions:
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.button(session["current_session"], icon="📄", width="stretch", on_click=loadSessionData, args=(session,))
+        with col2:
+            st.button("", icon="❌", width="stretch", key=f"delete_{session['current_session']}", on_click=deleteSession, args=(session["current_session"],))
+    st.divider()
     st.subheader("伴侣信息")
     chat_name = st.text_input("昵称", placeholder="请输入伴侣昵称", value=st.session_state.chat_name)
     chat_personality = st.text_area("性格", placeholder="请输入伴侣性格", value=st.session_state.chat_personality)
@@ -97,3 +156,4 @@ if prompt:
                 full_content += content
                 message_placeholder.chat_message("assistant").write(full_content)
     st.session_state.messages.append({"role": "assistant", "content": full_content})   # 将AI助手的回复添加到聊天记录中
+
