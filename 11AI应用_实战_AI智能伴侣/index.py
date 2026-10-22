@@ -57,30 +57,40 @@ def createNewSession():
 
 # 加载会话列表
 def loadSessions():
-    sessions = []
+    sessionsName = []
     if os.path.exists("./11AI应用_实战_AI智能伴侣/sessions"):
         for file_name in os.listdir("./11AI应用_实战_AI智能伴侣/sessions"):
             if file_name.endswith(".json"):
-                with open(f"./11AI应用_实战_AI智能伴侣/sessions/{file_name}", "r", encoding="utf-8") as f:
-                    sessions.append(json.load(f))
-    return sessions
+                sessionsName.append(file_name.replace(".json", ""))
+    sessionsName.sort(reverse=True)
+    return sessionsName
 
 # 加载会话数据
-def loadSessionData(session):
-    st.session_state.current_session = session["current_session"]
-    st.session_state.chat_name = session["chat_name"]
-    st.session_state.chat_personality = session["chat_personality"]
-    st.session_state.messages = session["messages"]
+def loadSessionData(sessionName):
+    if os.path.exists(f"./11AI应用_实战_AI智能伴侣/sessions/{sessionName}.json"):
+        with open(f"./11AI应用_实战_AI智能伴侣/sessions/{sessionName}.json", "r", encoding="utf-8") as f:
+            session = json.load(f)
+            st.session_state.current_session = session["current_session"]
+            st.session_state.chat_name = session["chat_name"]
+            st.session_state.chat_personality = session["chat_personality"]
+            st.session_state.messages = session["messages"]
 
 # 删除历史会话
 def deleteSession(sessionName):
-    if os.path.exists(f"./11AI应用_实战_AI智能伴侣/sessions/{sessionName}.json"):
-        os.remove(f"./11AI应用_实战_AI智能伴侣/sessions/{sessionName}.json")
+    try:
+        if os.path.exists(f"./11AI应用_实战_AI智能伴侣/sessions/{sessionName}.json"):
+            os.remove(f"./11AI应用_实战_AI智能伴侣/sessions/{sessionName}.json")
+        if st.session_state.current_session == sessionName:
+            st.session_state.messages = []
+            st.session_state.current_session = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    except Exception as e:
+        st.error(f"删除会话失败: {e}")
 
 # 设置页面标题和描述
 st.logo("🧸", size="large")
-st.title("AI智能伴侣")
-st.write("欢迎使用AI智能伴侣，这是一个可以与您进行自然语言交流的AI助手。")
+st.title("AI智能伴侣", text_alignment="center")
+st.text("欢迎使用AI智能伴侣，这是一个可以与您进行自然语言交流的AI助手。", width="stretch", text_alignment="center")
+st.divider()
 
 # 保存会话
 def saveSession():
@@ -101,13 +111,13 @@ with st.sidebar:
     st.subheader("AI控制面板")
     st.button("新建会话", icon="🖌️", width="stretch", on_click=createNewSession)
     st.text("历史会话")
-    sessions = loadSessions()
-    for session in sessions:
+    sessionsName = loadSessions()
+    for sessionName in sessionsName:
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.button(session["current_session"], icon="📄", width="stretch", on_click=loadSessionData, args=(session,))
+            st.button(sessionName, icon="📄", width="stretch", on_click=loadSessionData, args=(sessionName,), type="primary" if sessionName == st.session_state.current_session else "secondary")
         with col2:
-            st.button("", icon="❌", width="stretch", key=f"delete_{session['current_session']}", on_click=deleteSession, args=(session["current_session"],))
+            st.button("", icon="❌", width="stretch", key=f"delete_{sessionName}", on_click=deleteSession, args=(sessionName,))
     st.divider()
     st.subheader("伴侣信息")
     chat_name = st.text_input("昵称", placeholder="请输入伴侣昵称", value=st.session_state.chat_name)
@@ -119,6 +129,7 @@ if chat_name:
 if chat_personality:
     st.session_state.chat_personality = chat_personality
 
+st.text(f"当前会话: {st.session_state.current_session}")
 # 遍历历史聊天记录并显示
 for message in st.session_state.messages:
     st.chat_message(message["role"]).write(message["content"])
@@ -156,4 +167,5 @@ if prompt:
                 full_content += content
                 message_placeholder.chat_message("assistant").write(full_content)
     st.session_state.messages.append({"role": "assistant", "content": full_content})   # 将AI助手的回复添加到聊天记录中
-
+    saveSession()    # 保存会话
+    st.rerun()    # 重新运行程序，刷新页面

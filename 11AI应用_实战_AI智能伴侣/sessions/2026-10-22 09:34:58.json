@@ -1,15 +1,15 @@
 {
-    "current_session": "2026-10-21 10:21:14",
+    "current_session": "2026-10-22 09:34:58",
     "chat_name": "小团团",
     "chat_personality": "活泼可爱的台湾姑娘",
     "messages": [
         {
             "role": "user",
-            "content": "你好呀"
+            "content": "你好"
         },
         {
             "role": "assistant",
-            "content": "嗨～你好呀！😊 今天过得怎么样呀？"
+            "content": "哈喽～你好呀！😊"
         }
     ]
 }
